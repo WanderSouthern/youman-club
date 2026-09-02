@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Department {
+  id           String       @id @default(cuid())
+  slug         String       @unique
+  name         String
+  shortName    String       @default("")
+  summary      String       @default("")
+  description  String       @default("")
+  duties       String       @default("")
+  ministerNote String       @default("")
+  coverHue     String       @default("coral")
+  sortOrder    Int          @default(0)
+  published    Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  members      User[]
+  events       Event[]
+  files        FileAsset[]
+  intents      RecruitIntent[]
+}
+
+model User {
+  id            String    @id @default(cuid())
+  studentId     String    @unique
+  name          String
+  email         String    @unique
+  passwordHash  String
+  phone         String    @default("")
+  qq            String    @default("")
+  college       String    @default("")
+  grade         String    @default("")
+  gameDirection String    @default("")
+  bio           String    @default("")
+  avatar        String    @default("")
+  title         String    @default("")
+  role          String    @default("pending")
+  status        String    @default("pending")
+  departmentId  String?
+  department    Department? @relation(fields: [departmentId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  signups       EventSignup[]
+  checkins      EventCheckin[]
+  comments      EventComment[]
+  commentLikes  EventCommentLike[]
+  eventLikes    EventLike[]
+  uploads       FileAsset[]     @relation("Uploader")
+  logs          AuditLog[]
+  resets        PasswordReset[]
+  inbox         InboxMessage[]  @relation("Inbox")
+  sentMessages  InboxMessage[]  @relation("SentMessages")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  kind            String   @default("activity")
+  coverHue        String   @default("teal")
+  summary         String   @default("")
+  content         String   @default("")
+  coverImage      String   @default("")
+  location        String   @default("")
+  startsAt        DateTime
+  endsAt          DateTime
+  signupDeadline  DateTime?
+  capacity        Int      @default(0)
+  departmentId    String?
+  department      Department? @relation(fields: [departmentId], references: [id])
+  requireCheckin  Boolean  @default(true)
+  checkinOpen     Boolean  @default(false)
+  checkinCode     String   @default("")
+  checkinNonce    String   @default("")
+  checkinNonceExp DateTime?
+  published       Boolean  @default(true)
+  cancelledAt     DateTime?
+  notifiedStart   Boolean  @default(false)
+  notifiedEnd     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  signups         EventSignup[]
+  checkins        EventCheckin[]
+  comments        EventComment[]
+  likes           EventLike[]
+  messages        InboxMessage[]
+}
+
+model EventSignup {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+}
+
+model EventCheckin {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  method    String   @default("qr")
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+}
+
+model EventComment {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  content   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  likes     EventCommentLike[]
+}
+
+model EventCommentLike {
+  id        String       @id @default(cuid())
+  commentId String
+  userId    String
+  comment   EventComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@unique([commentId, userId])
+}
+
+model EventLike {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+}
+
+model Tournament {
+  id         String   @id @default(cuid())
+  title      String
+  slug       String   @unique
+  coverHue   String   @default("gold")
+  summary    String   @default("")
+  content    String   @default("")
+  location   String   @default("")
+  startsAt   DateTime
+  endsAt     DateTime
+  signupNote String   @default("")
+  projects   String   @default("[]")
+  resultNote String   @default("")
+  published  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  files      TournamentFile[]
+}
+
+model TournamentFile {
+  id           String     @id @default(cuid())
+  tournamentId String
+  fileId       String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  file         FileAsset  @relation(fields: [fileId], references: [id], onDelete: Cascade)
+}
+
+model FileAsset {
+  id           String   @id @default(cuid())
+  title        String
+  originalName String
+  storedName   String
+  mime         String   @default("application/octet-stream")
+  size         Int      @default(0)
+  category     String   @default("docs")
+  visibility   String   @default("club")
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  uploaderId   String
+  uploader     User     @relation("Uploader", fields: [uploaderId], references: [id])
+  createdAt    DateTime @default(now())
+  tournamentLinks TournamentFile[]
+}
+
+model RecruitIntent {
+  id            String   @id @default(cuid())
+  name          String
+  studentId     String
+  college       String   @default("")
+  grade         String   @default("")
+  phone         String   @default("")
+  qq            String   @default("")
+  email         String   @default("")
+  gameDirection String   @default("")
+  intro         String   @default("")
+  departmentId  String?
+  department    Department? @relation(fields: [departmentId], references: [id])
+  createdAt     DateTime @default(now())
+}
+
+model Quote {
+  id        String   @id @default(cuid())
+  content   String
+  source    String   @default("")
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model InboxMessage {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation("Inbox", fields: [userId], references: [id], onDelete: Cascade)
+  fromUserId String?
+  fromUser   User?     @relation("SentMessages", fields: [fromUserId], references: [id], onDelete: SetNull)
+  kind       String    @default("dm")
+  systemType String    @default("")
+  eventId    String?
+  event      Event?    @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  title      String
+  body       String    @default("")
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+model SiteConfig {
+  key   String @id
+  value String @default("")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  detail    String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

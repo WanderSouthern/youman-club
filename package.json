@@ -1,0 +1,33 @@
+{
+  "name": "youman-club",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev --host",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare && prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "setup": "prisma db push && tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.15.0",
+    "@vite-pwa/nuxt": "^1.0.4",
+    "bcryptjs": "^3.0.2",
+    "nuxt": "^3.17.7",
+    "qrcode": "^1.5.4",
+    "vue": "^3.5.18",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/qrcode": "^1.5.5",
+    "prisma": "^6.15.0",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2"
+  }
+}
