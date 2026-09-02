@@ -28,15 +28,17 @@ npm run dev
 | 20210005 | 社员 |
 | 20210006 | 待审核 |
 
-## 生产部署（学生云 + 学校二级域名）
+## 生产部署（腾讯云 Ubuntu + SQLite）
 
-1. 将 Prisma 数据源改为 MySQL 8：修改 `prisma/schema.prisma` 中 `provider = "mysql"`，`.env` 填写 `DATABASE_URL`。
-2. `npx prisma db push && npx tsx prisma/seed.ts`（或自行导入社长账号，勿在正式库重复种子演示数据）。
-3. `npm run build`，用 Nginx 反代 Node（`node .output/server/index.mjs`），配置 HTTPS。
-4. 上传目录为项目下 `data/uploads/`，请纳入备份。
-5. 修改 `.env` 中的 `SESSION_SECRET`。
+详细步骤见对话中的部署说明。要点：
 
-建议域名：`youman.fjnu.edu.cn`（以校团委核发为准）。
+1. `.env` 中设置 `DATABASE_URL="file:./prod.db"`、`SESSION_SECRET`、`NUXT_PUBLIC_SITE_URL`。
+2. 备案前用公网 IP + HTTP 时加上 `COOKIE_SECURE=false`，否则登录态无法保存。HTTPS 上线后改为 `true` 或删除该项。
+3. `npx prisma db push`，空库可 `npx tsx prisma/seed.ts`（演示密码请立刻修改）。
+4. `npm run build`，用 systemd 跑 `node .output/server/index.mjs`，Nginx 反代 80 端口。
+5. 上传目录为项目下 `data/uploads/`，与 `prisma/prod.db` 一并备份。
+
+建议正式域名：`youman.fjnu.edu.cn`（以校团委核发为准）。备案通过后配 HTTPS，并打开 `COOKIE_SECURE`。
 
 ## 模块说明
 

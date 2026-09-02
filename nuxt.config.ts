@@ -5,6 +5,7 @@ export default defineNuxtConfig({
   modules: ['@vite-pwa/nuxt'],
   runtimeConfig: {
     sessionSecret: process.env.SESSION_SECRET || 'youman-dev-change-this-in-production-32bytes',
+    cookieSecure: process.env.COOKIE_SECURE || '',
     public: {
       siteName: '游漫社',
       siteFullName: '福建师范大学旗山校区游戏协会',

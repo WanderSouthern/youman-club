@@ -29,6 +29,14 @@ function secret() {
   return useRuntimeConfig().sessionSecret
 }
 
+function cookieSecure() {
+  const raw = process.env.COOKIE_SECURE ?? process.env.NUXT_COOKIE_SECURE ?? useRuntimeConfig().cookieSecure
+  const v = String(raw || '').toLowerCase()
+  if (v === 'false' || v === '0') return false
+  if (v === 'true' || v === '1') return true
+  return process.env.NODE_ENV === 'production'
+}
+
 export function signToken(raw: string) {
   return createHmac('sha256', secret()).update(raw).digest('hex')
 }
@@ -40,7 +48,7 @@ export async function createSession(event: H3Event, userId: string) {
   setCookie(event, 'youman_sid', token, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: cookieSecure(),
     path: '/',
     maxAge: 60 * 60 * 24 * 21
   })
@@ -51,7 +59,7 @@ export async function destroyAuthSession(event: H3Event) {
   if (token) {
     await prisma.session.deleteMany({ where: { token: signToken(token) } })
   }
-  deleteCookie(event, 'youman_sid', { path: '/' })
+  deleteCookie(event, 'youman_sid', { path: '/', secure: cookieSecure() })
 }
 
 export async function getAuthUser(event: H3Event): Promise<User | null> {
