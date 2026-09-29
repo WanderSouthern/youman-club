@@ -2,7 +2,7 @@
 
 福建师范大学旗山校区游戏协会（游漫社）官方站点：一套代码覆盖桌面网站、手机 H5 与 PWA，不上架应用商店。
 
-策划与素材清单见 [`docs/策划案.md`](docs/策划案.md)、[`docs/素材与信息清单.md`](docs/素材与信息清单.md)。
+策划、需求与开发过程见 [`docs/策划案.md`](docs/策划案.md)、[`docs/软件需求规格说明书.md`](docs/软件需求规格说明书.md)、[`docs/开发过程文档.md`](docs/开发过程文档.md)。界面截图见 [`docs/screenshots/`](docs/screenshots/)。
 
 ## 本地运行
 
